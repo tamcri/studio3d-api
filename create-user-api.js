@@ -77,7 +77,16 @@ app.get('/progetti-utente', async (req, res) => {
   
     const { data, error } = await supabase
       .from('user_progetti')
-      .select('progetti(id, nome, descrizione, modello, immagine, pdf)')
+      .select(`
+        progetto:progetti (
+          id,
+          nome,
+          descrizione,
+          modello,
+          immagine,
+          pdf
+        )
+      `)
       .eq('user_id', userId);
   
     if (error) {
@@ -85,11 +94,12 @@ app.get('/progetti-utente', async (req, res) => {
       return res.status(500).json({ error: 'Errore lettura progetti utente' });
     }
   
-    // Estrai solo i progetti da user_progetti
-    const progetti = data.map((r) => r.progetti);
+    // Estrai i progetti mappati
+    const progetti = data.map((entry) => entry.progetto);
   
     return res.status(200).json(progetti);
   });
+  
   
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
