@@ -67,7 +67,30 @@ app.get('/progetti', async (req, res) => {
 
   return res.status(200).json(data);
 });
-
+// ✅ Elenco progetti collegati a un utente
+app.get('/progetti-utente', async (req, res) => {
+    const userId = req.query.user_id;
+  
+    if (!userId) {
+      return res.status(400).json({ error: 'user_id mancante' });
+    }
+  
+    const { data, error } = await supabase
+      .from('user_progetti')
+      .select('progetti(id, nome, descrizione, modello, immagine, pdf)')
+      .eq('user_id', userId);
+  
+    if (error) {
+      console.error('Errore progetti utente:', error.message);
+      return res.status(500).json({ error: 'Errore lettura progetti utente' });
+    }
+  
+    // Estrai solo i progetti da user_progetti
+    const progetti = data.map((r) => r.progetti);
+  
+    return res.status(200).json(progetti);
+  });
+  
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ API pronta su http://localhost:${PORT}`);
